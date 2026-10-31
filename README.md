@@ -51,7 +51,7 @@ The three most worth validating against real fit data: the flexibility table, th
 
 ## Bike database
 
-`src/data/bikes.ts`: road and gravel models from Trek, Specialized, Giant, Merida, Cannondale and Canyon. Numbers come from third-party listings (bikeinsights.com), not the manufacturers, and every entry is marked `verified: false` with a source link. Gravel bikes currently use the road fit rules.
+`src/data/bikes.ts`: road and gravel models from 20 brands (Trek, Specialized, Giant, Canyon, Cannondale, Merida, Scott, BMC, Cervélo, Bianchi, Colnago, Orbea, Ridley, Factor, Wilier, Santa Cruz, Fuji, Felt, Kona, Focus). Numbers come from third-party listings (bikeinsights.com), not the manufacturers, and every entry is marked `verified: false` with a source link. Gravel bikes currently use the road fit rules.
 
 ## Other
 
