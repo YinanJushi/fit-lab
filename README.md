@@ -53,6 +53,12 @@ The three most worth validating against real fit data: the flexibility table, th
 
 `src/data/bikes.ts`: 169 road and gravel models from 28 brands (Trek, Specialized, Giant, Canyon, Cannondale, Merida, Scott, BMC, Cervélo, Pinarello, Bianchi, Colnago, Orbea, Ridley, Cube, Factor, Wilier, Look, Santa Cruz, Fuji, Felt, Kona, Focus, Niner, Marin, Surly, All-City, Basso). Numbers come from third-party listings (bikeinsights.com), not the manufacturers, and every entry is marked `verified: false` with a source link. Gravel bikes currently use the road fit rules. Riders whose bike is not listed can type its geometry and save it as a custom bike (stored only in their browser, shown under "My bikes").
 
+## Automatic data updates
+
+`scripts/update-bikes.mjs` reads the public bikeinsights.com brand and bike pages (robots.txt allows it, it waits between requests) and merges what it finds into `src/data/bikes.json`. It only keeps pages that pass sanity checks (at least 3 sizes, stack and reach rising with size, plausible angles) and refuses to write if the data set would shrink by more than 10%.
+
+The GitHub Action in `.github/workflows/deploy.yml` runs it on the 1st of every month (or by hand: Actions → Deploy to GitHub Pages → Run workflow), keeps the result only if the tests still pass, commits `Refresh bike data`, and republishes the site. Brands to crawl are listed in `scripts/brands.json`. To run it yourself: `node scripts/update-bikes.mjs --brands=giant,trek`.
+
 ## Other
 
 - `ios/` is a Capacitor wrapper for a future App Store release (needs Xcode and a paid Apple Developer account). `npm run ios:sync` copies a fresh build into it.

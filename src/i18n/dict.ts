@@ -90,6 +90,11 @@ const en = {
   'bike.hint': 'Choose a model to fill in the geometry, or enter it yourself below.',
   'bike.type.road': 'Road',
   'bike.type.gravel': 'Gravel',
+  'bike.type.cyclocross': 'Cyclocross',
+  'bike.type.touring': 'Touring',
+  'bike.search': 'Search a model, for example Tarmac',
+  'bike.updated': 'Bike data updated {date}',
+  'bike.count': '{n} models',
   'bike.brand': 'Brand',
   'bike.model': 'Model',
   'bike.size': 'Size',
@@ -156,6 +161,7 @@ const en = {
     'Saddle height is a starting value. Change it by 5 mm at most per adjustment and ride 2–3 times before fine-tuning.',
   'note.crank_reference_only': 'Crank length is a rough guide only. You do not need to replace the cranks you have.',
 
+  'analytics.note': 'Visits are counted anonymously, with no cookies or personal data.',
   disclaimer:
     'A starting reference, not a substitute for a professional fit. If you feel pain, stop riding and ask a professional.',
   'lang.switch': '中文',
@@ -253,6 +259,11 @@ const zh: Record<Key, string> = {
   'bike.hint': '选择车型即可自动填入几何数据，也可以在下方自己输入。',
   'bike.type.road': '公路车',
   'bike.type.gravel': '砾石车',
+  'bike.type.cyclocross': '越野公路（CX）',
+  'bike.type.touring': '旅行车',
+  'bike.search': '搜索车型，例如 Tarmac',
+  'bike.updated': '车型数据更新于 {date}',
+  'bike.count': '{n} 款车型',
   'bike.brand': '品牌',
   'bike.model': '车型',
   'bike.size': '尺码',
@@ -319,6 +330,7 @@ const zh: Record<Key, string> = {
     '坐垫高度是起始值。每次最多调整 5 毫米，骑 2–3 次后再微调。',
   'note.crank_reference_only': '曲柄长度仅供参考，现有曲柄不必更换。',
 
+  'analytics.note': '访问次数会被匿名统计，不使用 cookie，也不收集个人信息。',
   disclaimer: '本工具给出的是起始参考值，不能替代专业 Fit。如出现疼痛请停止骑行并咨询专业人士。',
   'lang.switch': 'English',
 }

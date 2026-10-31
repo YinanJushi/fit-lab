@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { brandsFor, findBike, modelsFor } from '../data/bikes'
+import { BIKE_TYPES, brandsFor, DATA_UPDATED, findBike, modelsFor, searchBikes } from '../data/bikes'
 import { useT } from '../i18n'
 import { complete, FRAME_FIELDS, num, type CustomBike, type Form } from './form'
 
@@ -7,11 +7,13 @@ export const MINE = '__mine__'
 
 export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) => void }) {
   const t = useT()
-  const { type, brand, model, size } = form.bike
+  const { type, brand, model, size, year } = form.bike
+  const [q, setQ] = useState('')
+  const results = q.trim().length >= 2 ? searchBikes(type, q) : []
   const mine = form.customBikes.filter((b) => b.type === type)
   const brands = brandsFor(type)
   const models = brand && brand !== MINE ? modelsFor(type, brand) : []
-  const bike = model && brand !== MINE ? findBike(type, brand, model) : undefined
+  const bike = model && brand !== MINE ? findBike(type, brand, model, year) : undefined
   const chosen = bike?.sizes.find((s) => s.label === size)
   const custom = brand === MINE ? mine.find((b) => b.id === model) : undefined
 
@@ -28,9 +30,13 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
     if (!s) return
     set({ bike: { ...form.bike, size: label }, v: fill(s) })
   }
+  const pickFound = (b: { brand: string; model: string; year: number }) => {
+    setQ('')
+    setBike({ brand: b.brand, model: b.model, year: b.year, size: '' })
+  }
   const pickCustom = (id: string) => {
     const c = mine.find((b) => b.id === id)
-    set({ bike: { ...form.bike, model: id, size: '' }, ...(c ? { v: fill(c) } : {}) })
+    set({ bike: { ...form.bike, model: id, year: undefined, size: '' }, ...(c ? { v: fill(c) } : {}) })
   }
   const remove = (id: string) => {
     set({
@@ -46,13 +52,30 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
       <h2>{t('bike.title')}</h2>
       <p className="muted">{t('bike.hint')}</p>
       <div className="chips" role="group">
-        {(['road', 'gravel'] as const).map((k) => (
+        {BIKE_TYPES.map((k) => (
           <button key={k} className={`chip ${type === k ? 'on' : ''}`} aria-pressed={type === k}
-            onClick={() => setBike({ type: k, brand: '', model: '', size: '' })}>
+            onClick={() => { setQ(''); setBike({ type: k, brand: '', model: '', year: undefined, size: '' }) }}>
             {t(`bike.type.${k}`)}
           </button>
         ))}
       </div>
+
+      {hasAny && (
+        <div className="search">
+          <input type="search" value={q} placeholder={t('bike.search')} onChange={(e) => setQ(e.target.value)} />
+          {results.length > 0 && (
+            <ul className="results">
+              {results.map((b) => (
+                <li key={`${b.brand}|${b.model}|${b.year}`}>
+                  <button onClick={() => pickFound(b)}>
+                    <strong>{b.brand}</strong> {b.model} <small>{b.year}</small>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {!hasAny ? (
         <p className="tip">{t('bike.none')}</p>
@@ -60,7 +83,7 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
         <>
           <label className="field">
             <span className="lbl">{t('bike.brand')}</span>
-            <select value={brand} onChange={(e) => setBike({ brand: e.target.value, model: '', size: '' })}>
+            <select value={brand} onChange={(e) => setBike({ brand: e.target.value, model: '', year: undefined, size: '' })}>
               <option value="">{t('bike.choose')}</option>
               {mine.length > 0 && <option value={MINE}>{t('bike.mine')}</option>}
               {brands.map((b) => <option key={b}>{b}</option>)}
@@ -80,9 +103,15 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
           {brand && brand !== MINE && (
             <label className="field">
               <span className="lbl">{t('bike.model')}</span>
-              <select value={model} onChange={(e) => setBike({ model: e.target.value, size: '' })}>
+              <select
+                value={model ? `${model}|${year ?? ''}` : ''}
+                onChange={(e) => {
+                  const [name, y] = e.target.value.split('|')
+                  setBike({ model: name, year: y ? Number(y) : undefined, size: '' })
+                }}
+              >
                 <option value="">{t('bike.choose')}</option>
-                {models.map((m) => <option key={m.model} value={m.model}>{m.model} ({m.year})</option>)}
+                {models.map((m) => <option key={`${m.model}|${m.year}`} value={`${m.model}|${m.year}`}>{m.model} ({m.year})</option>)}
               </select>
             </label>
           )}
@@ -121,6 +150,7 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
           )}
         </>
       )}
+      <p className="muted small">{t('bike.updated', { date: DATA_UPDATED })}</p>
       <p className="tip">{t('bike.notlisted')}</p>
       <h3 className="manual">{t('bike.manual')}</h3>
     </section>

@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { RANGES } from '../../ui/form'
+// same limits the data collector enforces
+const RANGES = { stack: [400, 800], reach: [300, 520], hta: [65, 78], sta: [68, 80] } as const
 import { BIKES } from '../bikes'
 
 describe('bike database', () => {
   it('has unique brand/model/year entries', () => {
     const keys = BIKES.map((b) => `${b.brand}|${b.model}|${b.year}`)
     expect(new Set(keys).size).toBe(keys.length)
+  })
+  it('only uses known bike types', () => {
+    for (const b of BIKES) expect(['road', 'gravel', 'cyclocross', 'touring']).toContain(b.type)
   })
   it('keeps every size inside the app plausibility ranges', () => {
     for (const b of BIKES)

@@ -1,4 +1,5 @@
 import type { FitInput, Flexibility, Goal } from '../engine/types'
+import type { BikeType } from '../data/bikes'
 import type { Key } from '../i18n'
 
 export type FieldKey =
@@ -27,7 +28,7 @@ export const isAngle = (k: FieldKey) => k === 'hta' || k === 'sta'
 export interface CustomBike {
   id: string
   name: string
-  type: 'road' | 'gravel'
+  type: BikeType
   stack: number
   reach: number
   hta: number
@@ -41,7 +42,7 @@ export interface Form {
   cur: Record<CurKey, string>
   flex: Flexibility | null
   goal: Goal | null
-  bike: { type: 'road' | 'gravel'; brand: string; model: string; size: string }
+  bike: { type: BikeType; brand: string; model: string; size: string; year?: number }
   customBikes: CustomBike[]
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Flexibility, Goal } from './engine/types'
+import { analyticsOn, trackEvent } from './analytics'
 import { LangContext, makeT, type Key } from './i18n'
 import { BikePicker, SaveBike } from './ui/BikePicker'
 import { computeFit } from './engine/fit'
@@ -29,6 +30,9 @@ export default function App() {
   const t = useMemo(() => makeT(form.lang), [form.lang])
 
   useEffect(() => save(STORAGE_KEY, form), [form])
+  useEffect(() => {
+    if (form.step === 5) trackEvent('fit-result')
+  }, [form.step])
   useEffect(() => {
     document.documentElement.lang = form.lang === 'zh' ? 'zh-CN' : 'en'
     window.scrollTo(0, 0)
@@ -163,7 +167,7 @@ export default function App() {
             </div>
           )}
 
-          {step === 5 && (input ? <Result input={input} kind={form.bike.type} maxTire={findBike(form.bike.type, form.bike.brand, form.bike.model)?.maxTire} /> : <p>{t('err.empty')}</p>)}
+          {step === 5 && (input ? <Result input={input} kind={form.bike.type} maxTire={findBike(form.bike.type, form.bike.brand, form.bike.model, form.bike.year)?.maxTire} /> : <p>{t('err.empty')}</p>)}
         </main>
 
         <div className="bottom">
@@ -178,7 +182,10 @@ export default function App() {
           </div>
         )}
 
-        <footer className="disclaimer">{t('disclaimer')}</footer>
+        <footer className="disclaimer">
+          {t('disclaimer')}
+          {analyticsOn() && <span className="count-note"> {t('analytics.note')}</span>}
+        </footer>
         </div>
       </div>
     </LangContext.Provider>

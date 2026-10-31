@@ -1,24 +1,30 @@
-# Builds the site and publishes it to GitHub Pages on every push to main.
+# Builds the site and publishes it to GitHub Pages.
+#  - on every push to main
+#  - once a month (and on demand): first refreshes the bike database from the public source,
+#    keeps the new data only if the tests still pass, commits it, then publishes.
 # One-time setup: repo Settings → Pages → Source: "GitHub Actions".
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '0 3 1 * *' # 03:00 UTC on the 1st of each month
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +32,33 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+
+      - name: Refresh bike data
+        if: github.event_name != 'push'
+        continue-on-error: true
+        run: node scripts/update-bikes.mjs --max-families=25 --workers=2 --delay=1000
+
+      - name: Check the refreshed data
+        id: refreshed
+        if: github.event_name != 'push'
+        continue-on-error: true
+        run: npm run test
+
+      - name: Keep the old data if the refreshed data fails the tests
+        if: github.event_name != 'push' && steps.refreshed.outcome == 'failure'
+        run: git checkout -- src/data/bikes.json
+
+      - name: Commit refreshed data
+        if: github.event_name != 'push'
+        run: |
+          if ! git diff --quiet -- src/data/bikes.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/data/bikes.json
+            git commit -m "Refresh bike data"
+            git push
+          fi
+
       - run: npm run test
       - run: npm run build
       - uses: actions/configure-pages@v5

@@ -1,6 +1,6 @@
 import type { Goal } from './types'
 
-export type BikeKind = 'road' | 'gravel'
+export type BikeKind = 'road' | 'gravel' | 'cyclocross' | 'touring'
 
 /**
  * Suggested tire width range (mm) by bike type and goal. Grade C: general guidance, not
@@ -18,6 +18,19 @@ export const TIRE_WIDTH_RANGE: Record<BikeKind, Record<Goal, [number, number]>> 
     endurance: [38, 42],
     race: [35, 40],
     aero: [35, 38],
+  },
+  // cyclocross racing is capped at 33 mm by UCI rules; leisure riders usually go wider
+  cyclocross: {
+    comfort: [38, 42],
+    endurance: [35, 40],
+    race: [33, 35],
+    aero: [33, 33],
+  },
+  touring: {
+    comfort: [38, 47],
+    endurance: [35, 42],
+    race: [32, 35],
+    aero: [28, 32],
   },
 }
 

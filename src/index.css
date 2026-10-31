@@ -276,3 +276,11 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
 .save-bike .ok { color: var(--brand); font-weight: 600; margin: 8px 0 0; }
 .save-bike .msg-warn { color: var(--accent); font-weight: 600; margin: 8px 0 0; }
 button.link { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; font: inherit; }
+
+.search { position: relative; margin: 6px 0 12px; }
+.search input { width: 100%; min-height: 48px; border: 1.5px solid var(--line); background: var(--surface); border-radius: 14px; padding: 0 14px; font-size: 1rem; }
+.results { list-style: none; margin: 6px 0 0; padding: 4px; background: var(--surface); border-radius: 14px; border: 1.5px solid var(--line); max-height: 260px; overflow: auto; }
+.results button { width: 100%; text-align: left; min-height: 44px; background: none; border: 0; border-radius: 10px; padding: 0 12px; cursor: pointer; }
+.results button:hover { background: var(--accent-soft); }
+.results small { color: var(--muted); margin-left: 6px; }
+.small { font-size: .82rem; }
