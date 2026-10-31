@@ -24,6 +24,16 @@ export const FRAME_FIELDS: FieldKey[] = ['stack', 'reach', 'hta', 'sta']
 export const CUR_FIELDS: CurKey[] = ['saddleHeight', 'stemLength', 'stemAngle', 'spacers', 'barReach', 'crankLength']
 export const isAngle = (k: FieldKey) => k === 'hta' || k === 'sta'
 
+export interface CustomBike {
+  id: string
+  name: string
+  type: 'road' | 'gravel'
+  stack: number
+  reach: number
+  hta: number
+  sta: number
+}
+
 export interface Form {
   lang: 'zh' | 'en'
   step: number
@@ -32,6 +42,7 @@ export interface Form {
   flex: Flexibility | null
   goal: Goal | null
   bike: { type: 'road' | 'gravel'; brand: string; model: string; size: string }
+  customBikes: CustomBike[]
 }
 
 const blank = <K extends string>(keys: K[]) => Object.fromEntries(keys.map((k) => [k, ''])) as Record<K, string>
@@ -44,6 +55,7 @@ export const EMPTY_FORM: Form = {
   flex: null,
   goal: null,
   bike: { type: 'road', brand: '', model: '', size: '' },
+  customBikes: [],
 }
 
 export const EXAMPLE: Pick<Form, 'v' | 'flex' | 'goal'> = {

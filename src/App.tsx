@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Flexibility, Goal } from './engine/types'
 import { LangContext, makeT, type Key } from './i18n'
-import { BikePicker } from './ui/BikePicker'
+import { BikePicker, SaveBike } from './ui/BikePicker'
 import { computeFit } from './engine/fit'
 import { findBike } from './data/bikes'
 import { BodyDiagram, FrameDiagram, PostureIcon, ResultDiagram } from './ui/Diagrams'
@@ -145,6 +145,7 @@ export default function App() {
                 form={form} set={set} keys={FRAME_FIELDS} focus={focus} setFocus={setFocus}
                 visual={<FrameDiagram active={focus ?? 'stack'} />}
               />
+              <SaveBike form={form} set={set} />
               <details className="optional">
                 <summary>{t('cur.title')}<small>{t('cur.opt')}</small></summary>
                 {CUR_FIELDS.map((k) => (
