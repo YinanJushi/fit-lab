@@ -22,6 +22,8 @@ export interface Bike {
   verified: boolean
   /** true when the source listed only some of the brand's sizes */
   partial?: boolean
+  /** frame's maximum tire width in mm. Where sources disagreed, the lowest credible value is used. */
+  maxTire?: number
   sizes: BikeSize[]
 }
 
@@ -32,6 +34,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Specialized',
     model: 'Tarmac SL8',
+    maxTire: 32,
     type: 'road',
     year: 2025,
     source: 'https://bikeinsights.com/bikes/6850bdb5a0f4c2001a532a11-specialized-bicycles-tarmac-sl8',
@@ -47,6 +50,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Giant',
     model: 'TCR Advanced 0',
+    maxTire: 32,
     type: 'road',
     year: 2026,
     source: 'https://bikeinsights.com/bikes/5ec58ac612391b00171718bd-giant-bicycles-tcr-advanced',
@@ -77,6 +81,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Trek',
     model: 'Domane SL 6 Gen 3',
+    maxTire: 38,
     type: 'road',
     year: 2023,
     source: 'https://bikeinsights.com/bikes/5afb4f314cb7640014ce45f2-trek-bikes-domane?build=sl-6-gen-3&version=2023',
@@ -92,6 +97,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Trek',
     model: 'Checkpoint ALR 5',
+    maxTire: 45,
     type: 'gravel',
     year: 2023,
     source: 'https://bikeinsights.com/bikes/5afb51844cb7640014ce4612-trek-bikes-checkpoint?build=sl5&version=2023',
@@ -107,6 +113,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Specialized',
     model: 'Diverge Comp Carbon',
+    maxTire: 50,
     type: 'gravel',
     year: 2025,
     source: 'https://bikeinsights.com/bikes/677ef3df5beedc00205e0660-specialized-bicycles-diverge?build=comp-carbon&version=2025',
@@ -122,6 +129,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Giant',
     model: 'Revolt Advanced',
+    maxTire: 45,
     type: 'gravel',
     year: 2024,
     source: 'https://bikeinsights.com/bikes/5d40cc4486fb150017418dc8-giant-bicycles-revolt-advanced',
@@ -137,6 +145,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Merida',
     model: 'Silex 4000',
+    maxTire: 45,
     type: 'gravel',
     year: 2024,
     source: 'https://bikeinsights.com/bikes/5d60906a04c1cd001759173f-merida-bikes-silex?build=4000&version=2024',
@@ -152,6 +161,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Cannondale',
     model: 'SuperSix EVO',
+    maxTire: 32,
     type: 'road',
     year: 2026,
     source: 'https://bikeinsights.com/bikes/5b48e33f73697a0014037051-cannondale-bikes-supersix-evo',
@@ -182,6 +192,7 @@ export const BIKES: Bike[] = [
   {
     brand: 'Canyon',
     model: 'Grizl CF SL 6',
+    maxTire: 45,
     type: 'gravel',
     year: 2022,
     source: 'https://bikeinsights.com/bikes/609a678f9fed2b001c027a44-canyon-bicycles-grizl?build=cf-sl-6&version=2022',

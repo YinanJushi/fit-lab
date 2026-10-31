@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { computeFit } from '../engine/fit'
+import { recommendTires, type BikeKind } from '../engine/tires'
 import type { FitInput, FitResult, WarningCode } from '../engine/types'
 import { useT, type Key } from '../i18n'
 import { ResultDiagram } from './Diagrams'
@@ -15,9 +16,32 @@ const CMP_LABEL: Record<string, Key> = {
   crankLength: 'r.crank',
 }
 
-export function Result({ input }: { input: FitInput }) {
+function CountUp({ value }: { value: number }) {
+  const [shown, setShown] = useState(value)
+  useEffect(() => {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduce) {
+      setShown(value)
+      return
+    }
+    const start = performance.now()
+    const from = value * 0.9
+    let raf = 0
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - start) / 900)
+      setShown(from + (value - from) * (1 - Math.pow(1 - k, 3)))
+      if (k < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+  return <>{fmt(shown)}</>
+}
+
+export function Result({ input, kind, maxTire }: { input: FitInput; kind: BikeKind; maxTire?: number }) {
   const t = useT()
   const r: FitResult = useMemo(() => computeFit(input), [input])
+  const tires = recommendTires(kind, input.goal, maxTire)
 
   const setback = Math.round(r.saddleSetback)
   const rail = Math.round(r.railOffset)
@@ -25,10 +49,11 @@ export function Result({ input }: { input: FitInput }) {
 
   return (
     <div className="result">
+      <div className="result-main">
       <section className="hero-card" aria-label={t('result.title')}>
         <p className="eyebrow">{t(`goal.${input.goal}` as Key)}</p>
         <div className="hero-number">
-          <span>{fmt(r.saddleHeight)}</span>
+          <span><CountUp value={r.saddleHeight} /></span>
           <small>{t('unit.mm')}</small>
         </div>
         <p className="hero-label">{t('r.saddleHeight')}</p>
@@ -47,7 +72,9 @@ export function Result({ input }: { input: FitInput }) {
       )}
 
       <ResultDiagram input={input} result={r} />
+      </div>
 
+      <div className="result-side">
       <Group title={t('result.saddle')}>
         <Row k={t('r.saddleHeight')} v={`${fmt(r.saddleHeight)} ${t('unit.mm')}`} />
         <Row
@@ -73,6 +100,15 @@ export function Result({ input }: { input: FitInput }) {
         <Row k={t('r.torso')} v={`${fmt(r.torsoAngle)}°`} />
       </Group>
 
+      <Group title={t('result.tires')}>
+        <div className="tire-card">
+          <strong>{tires.min === tires.max ? t('tire.single', { n: tires.max }) : t('tire.range', { min: tires.min, max: tires.max })}</strong>
+          <p>{tires.frameMax !== null ? t('tire.frame', { n: tires.frameMax }) : t('tire.noframe')}</p>
+          {tires.frameLimited && <p className="tire-warn">{t('tire.limited')}</p>}
+          <small>{t('tire.tip')}</small>
+        </div>
+      </Group>
+
       {r.comparison.length > 0 && (
         <Group title={t('cmp.title')}>
           {r.comparison.map((c) => (
@@ -92,6 +128,7 @@ export function Result({ input }: { input: FitInput }) {
           <li key={n}>{t(`note.${n}` as Key)}</li>
         ))}
       </ul>
+      </div>
     </div>
   )
 }

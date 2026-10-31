@@ -1,6 +1,7 @@
 import { handPosition, stemClampPoint } from '../engine/cockpit'
 import { saddlePoint } from '../engine/saddle'
-import type { FitInput, FitResult, Point } from '../engine/types'
+import { PROFILES } from '../engine/profiles'
+import type { FitInput, FitResult, Goal, Point } from '../engine/types'
 import { useT } from '../i18n'
 import type { FieldKey } from './form'
 
@@ -88,10 +89,19 @@ export function FrameDiagram({ active }: { active?: FieldKey }) {
   )
 }
 
-const SIDE = { minX: -560, w: 1400, minY: -1260, h: 1560 }
+const SIDE = { minX: -790, w: 1730, minY: -1260, h: 1560 }
 
 /** Side view of bike + rider; overlays the user's current setup when given. */
-export function ResultDiagram({ input, result }: { input: FitInput; result: FitResult }) {
+export function ResultDiagram({
+  input,
+  result,
+  compact = false,
+}: {
+  input: FitInput
+  result: FitResult
+  /** hero use: no legend, line-draw animation */
+  compact?: boolean
+}) {
   const t = useT()
   const { frame, current } = input
   const g = result.geometry
@@ -124,18 +134,18 @@ export function ResultDiagram({ input, result }: { input: FitInput; result: FitR
   const ghostSaddle = current?.saddleHeight !== undefined ? saddlePoint(current.saddleHeight, frame.sta) : null
 
   return (
-    <figure className="result-diagram">
+    <figure className={`result-diagram ${compact ? 'compact' : ''}`}>
       <svg
         viewBox={`${SIDE.minX} ${SIDE.minY} ${SIDE.w} ${SIDE.h}`}
         role="img"
         aria-label={t('diagram.title')}
       >
-        <line className="floor" x1={-560} y1={270} x2={840} y2={270} />
+        <line className="floor" x1={-790} y1={270} x2={940} y2={270} />
         <circle className="wheel" cx={hubR.x} cy={-hubR.y} r={340} />
         <circle className="wheel" cx={hubF.x} cy={-hubF.y} r={340} />
         <g className="bike">
-          <polyline points={line([hubR, { x: 0, y: 0 }, headBot, hubF])} />
-          <polyline points={line([{ x: 0, y: 0 }, seatTop, g.headTop, headBot])} />
+          <polyline pathLength={1} points={line([hubR, { x: 0, y: 0 }, headBot, hubF])} />
+          <polyline pathLength={1} points={line([{ x: 0, y: 0 }, seatTop, g.headTop, headBot])} />
           <line x1={hubR.x} y1={-hubR.y} x2={seatTop.x} y2={-seatTop.y} />
           <line x1={0} y1={0} x2={onFrame.x} y2={-onFrame.y} />
           <polyline points={line([g.headTop, g.stemClamp])} className="stem" />
@@ -151,17 +161,41 @@ export function ResultDiagram({ input, result }: { input: FitInput; result: FitR
         )}
         <line className="saddle" x1={g.saddle.x - 100} y1={-g.saddle.y} x2={g.saddle.x + 80} y2={-g.saddle.y} />
         <g className="rider">
-          <polyline points={line([pedal, g.hip, g.shoulder, g.hands])} />
+          <polyline pathLength={1} points={line([pedal, g.hip, g.shoulder, g.hands])} />
           <circle cx={head.x} cy={-head.y} r={55} />
         </g>
         <circle className="target" cx={g.targetHands.x} cy={-g.targetHands.y} r={26} />
         <circle className="hands" cx={g.hands.x} cy={-g.hands.y} r={20} />
       </svg>
+      {!compact && (
       <figcaption>
         <span className="lg lg-rec">{t('diagram.legend.rec')}</span>
         {ghostStem || ghostSaddle ? <span className="lg lg-cur">{t('diagram.legend.cur')}</span> : null}
         <span className="lg lg-target">{t('diagram.legend.target')}</span>
       </figcaption>
+      )}
     </figure>
+  )
+}
+
+/** Tiny rider-on-bike drawing whose posture comes from the profile's real torso and shoulder angles. */
+export function PostureIcon({ goal }: { goal: Goal }) {
+  const p = PROFILES[goal]
+  const torso = (p.torsoAngle[0] + p.torsoAngle[1]) / 2
+  const a = rad(torso)
+  const arm = rad(torso + p.shoulderAngle - 180)
+  const hip = { x: 34, y: 40 }
+  const shoulder = { x: hip.x + 34 * Math.cos(a), y: hip.y - 34 * Math.sin(a) }
+  const hand = { x: shoulder.x + 33 * Math.cos(arm), y: shoulder.y - 33 * Math.sin(arm) }
+  const bb = { x: 40, y: 62 }
+  return (
+    <svg className="posture" viewBox="0 0 130 80" aria-hidden="true">
+      <circle className="pw" cx="18" cy="64" r="13" />
+      <circle className="pw" cx="108" cy="64" r="13" />
+      <polyline className="pf" points={`18,64 ${bb.x},${bb.y} 88,36 32,34 ${bb.x},${bb.y}`} />
+      <polyline className="pf" points="88,36 108,64" />
+      <polyline className="pr" points={`${bb.x},${bb.y + 8} ${hip.x},${hip.y} ${shoulder.x},${shoulder.y} ${hand.x},${hand.y}`} />
+      <circle className="ph" cx={shoulder.x + 8} cy={shoulder.y - 8} r="6" />
+    </svg>
   )
 }

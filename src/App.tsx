@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import type { Flexibility, Goal } from './engine/types'
 import { LangContext, makeT, type Key } from './i18n'
 import { BikePicker } from './ui/BikePicker'
-import { BodyDiagram, FrameDiagram } from './ui/Diagrams'
+import { computeFit } from './engine/fit'
+import { findBike } from './data/bikes'
+import { BodyDiagram, FrameDiagram, PostureIcon, ResultDiagram } from './ui/Diagrams'
 import {
   BODY_FIELDS, CUR_FIELDS, EMPTY_FORM, EXAMPLE, FRAME_FIELDS, RANGES, complete, fieldHow, fieldLabel,
   isAngle, status, toInput, type FieldKey, type Form,
@@ -11,6 +13,12 @@ import { Result } from './ui/Result'
 import { load, save } from './ui/storage'
 
 const STORAGE_KEY = 'fitlab.v1'
+
+// Real computed example used for the welcome illustration.
+const DEMO = (() => {
+  const input = toInput({ ...EMPTY_FORM, ...EXAMPLE })!
+  return { input, result: computeFit(input) }
+})()
 const STEPS: Key[] = ['step.body', 'step.flex', 'step.goal', 'step.frame', 'step.result']
 const GOALS: Goal[] = ['comfort', 'endurance', 'race', 'aero']
 const FLEX: Flexibility[] = [0, 1, 2, 3]
@@ -61,9 +69,15 @@ export default function App() {
         <main className="screen" key={step}>
           {step === 0 && (
             <section className="intro">
-              <h1>{t('app.tagline')}</h1>
-              <p>{t('intro.body')}</p>
-              <p className="muted">{t('intro.time')}</p>
+              <div className="hero">
+                <p className="kicker">{t('hero.kicker')}</p>
+                <h1>{t('app.tagline')}</h1>
+                <div className="hero-art"><ResultDiagram input={DEMO.input} result={DEMO.result} compact /></div>
+                <ul className="perks">
+                  <li>{t('perk.time')}</li><li>{t('perk.private')}</li><li>{t('perk.offline')}</li>
+                </ul>
+              </div>
+              <p className="lede">{t('intro.body')}</p>
               <button className="primary" onClick={() => go(1)}>{t('start')}</button>
               <button
                 className="secondary"
@@ -71,7 +85,16 @@ export default function App() {
               >
                 {t('example')}
               </button>
-              <FrameDiagram />
+              <h2 className="how-title">{t('how.title')}</h2>
+              <ol className="how">
+                {[1, 2, 3].map((n) => (
+                  <li key={n}>
+                    <span className="num">{n}</span>
+                    <strong>{t(`how.${n}.t` as Key)}</strong>
+                    <p>{t(`how.${n}.d` as Key)}</p>
+                  </li>
+                ))}
+              </ol>
             </section>
           )}
 
@@ -105,6 +128,7 @@ export default function App() {
                 {GOALS.map((g) => (
                   <button key={g} className={`choice goal ${form.goal === g ? 'sel' : ''}`} aria-pressed={form.goal === g}
                     onClick={() => set({ goal: g })}>
+                    <PostureIcon goal={g} />
                     <strong>{t(`goal.${g}` as Key)}</strong>
                     <span>{t(`goal.${g}.d` as Key)}</span>
                   </button>
@@ -114,8 +138,9 @@ export default function App() {
           )}
 
           {step === 4 && (
-            <>
+            <div className="frame-step">
               <BikePicker form={form} set={set} />
+              <div className="frame-fields">
               <FieldsStep
                 form={form} set={set} keys={FRAME_FIELDS} focus={focus} setFocus={setFocus}
                 visual={<FrameDiagram active={focus ?? 'stack'} />}
@@ -133,10 +158,11 @@ export default function App() {
                   </label>
                 ))}
               </details>
-            </>
+              </div>
+            </div>
           )}
 
-          {step === 5 && (input ? <Result input={input} /> : <p>{t('err.empty')}</p>)}
+          {step === 5 && (input ? <Result input={input} kind={form.bike.type} maxTire={findBike(form.bike.type, form.bike.brand, form.bike.model)?.maxTire} /> : <p>{t('err.empty')}</p>)}
         </main>
 
         <div className="bottom">
@@ -172,7 +198,7 @@ function FieldsStep(props: {
   const { form, set, keys, setFocus } = props
   const t = useMemo(() => makeT(form.lang), [form.lang])
   return (
-    <section>
+    <section className="fields-step">
       {props.title && <h2>{props.title}</h2>}
       {props.intro && <p className="muted">{props.intro}</p>}
       {props.tip && <p className="tip">{t('measure.tip')}</p>}

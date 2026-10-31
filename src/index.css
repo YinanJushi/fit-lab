@@ -30,6 +30,11 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.45; }
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 40% at 85% 0%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 70%),
+    radial-gradient(50% 35% at 0% 30%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+    repeating-radial-gradient(circle at 110% 8%, transparent 0 34px, color-mix(in srgb, var(--ink) 4%, transparent) 34px 35px); }
 button, input { font: inherit; color: inherit; }
 h1 { font-size: 2.1rem; line-height: 1.1; letter-spacing: -0.02em; margin: 0.4em 0; font-weight: 800; }
 h2 { font-size: 1.5rem; margin: 0.2em 0 0.4em; letter-spacing: -0.01em; }
@@ -158,3 +163,107 @@ button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px 
 .filled small { color: var(--muted); }
 .filled a { color: var(--accent); }
 .manual { margin-top: 20px; }
+
+/* ---- welcome ---- */
+.hero { position: relative; background: var(--brand); color: var(--on-brand); border-radius: 28px; padding: 22px 20px 18px; overflow: hidden; }
+.hero::after { content: ''; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px; border-radius: 50%;
+  background: color-mix(in srgb, var(--on-brand) 12%, transparent); }
+.kicker { position: relative; z-index: 1; margin: 0; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; opacity: .85; }
+.hero h1 { position: relative; z-index: 1; font-family: ui-rounded, 'SF Pro Rounded', -apple-system, system-ui, sans-serif; font-size: 2.3rem; margin: .25em 0 .1em; }
+.hero-art { position: relative; z-index: 1; margin: 6px -8px 0; }
+.hero-art .result-diagram { background: transparent; margin: 0; padding: 0; }
+.hero-art svg { max-height: 250px; }
+.perks { position: relative; z-index: 1; list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.perks li { background: color-mix(in srgb, var(--on-brand) 18%, transparent); border-radius: 999px; padding: 6px 12px; font-size: .82rem; font-weight: 600; }
+.lede { margin: 18px 0 6px; color: var(--muted); font-size: 1.02rem; }
+.how-title { margin-top: 30px; }
+.how { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; counter-reset: s; }
+.how li { background: var(--surface); border-radius: var(--radius); padding: 14px 16px 14px 62px; position: relative; }
+.how .num { position: absolute; left: 14px; top: 14px; width: 36px; height: 36px; border-radius: 12px; background: var(--accent-soft); color: var(--accent);
+  display: grid; place-items: center; font-weight: 800; font-family: ui-rounded, system-ui, sans-serif; font-size: 1.1rem; }
+.how p { margin: 2px 0 0; color: var(--muted); font-size: .92rem; }
+.intro .primary, .intro .secondary { width: 100%; margin-top: 10px; flex: none; }
+
+/* line-draw animation for the hero illustration */
+.result-diagram.compact .bike polyline, .result-diagram.compact .rider polyline { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.8s ease-out .15s forwards; }
+.result-diagram.compact .rider polyline { animation-delay: .7s; }
+.result-diagram.compact .wheel, .result-diagram.compact .floor { stroke: color-mix(in srgb, var(--on-brand) 35%, transparent); }
+.result-diagram.compact .bike polyline, .result-diagram.compact .bike line { stroke: var(--on-brand); }
+.result-diagram.compact .bike .stem { stroke: var(--on-brand); }
+.result-diagram.compact .saddle { stroke: var(--on-brand); }
+.result-diagram.compact .rider polyline { stroke: #ffb48f; }
+.result-diagram.compact .rider circle { fill: #ffb48f; }
+.result-diagram.compact .target { display: none; }
+.result-diagram.compact .hands { fill: var(--on-brand); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .result-diagram.compact .bike polyline, .result-diagram.compact .rider polyline { animation: none; stroke-dashoffset: 0; }
+}
+
+/* ---- goal cards ---- */
+.choice.goal { display: grid; grid-template-columns: 112px 1fr; column-gap: 14px; align-items: center; }
+.choice.goal .posture { grid-row: 1 / span 2; width: 112px; height: auto; }
+.choice.goal strong, .choice.goal span { grid-column: 2; }
+.posture .pw { fill: none; stroke: var(--line); stroke-width: 3; }
+.posture .pf { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.posture .pr { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.posture .ph { fill: var(--accent); }
+.choice.goal.sel .pf { stroke: var(--brand); }
+
+/* ---- tires ---- */
+.tire-card { padding: 14px 0; display: grid; gap: 6px; }
+.tire-card strong { font-size: 1.35rem; font-family: ui-rounded, system-ui, sans-serif; color: var(--brand); }
+.tire-card p { margin: 0; }
+.tire-card .tire-warn { color: var(--accent); font-weight: 600; }
+.tire-card small { color: var(--muted); }
+
+/* ---- hover (mouse) ---- */
+@media (hover: hover) {
+  button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+  button.secondary:hover, .ghost-btn:hover, .chip:hover { border-color: var(--brand); }
+  .choice:hover { border-color: color-mix(in srgb, var(--brand) 50%, transparent); }
+}
+
+/* ---- tablet ---- */
+@media (min-width: 720px) {
+  .app { max-width: 900px; }
+  .choices { grid-template-columns: 1fr 1fr; }
+  .how { grid-template-columns: repeat(3, 1fr); }
+  .how li { padding: 66px 16px 16px; }
+  .actions { max-width: 560px; margin: 0 auto; width: 100%; }
+}
+
+/* ---- laptop ---- */
+@media (min-width: 1000px) {
+  .app { max-width: 1120px; padding-left: 32px; padding-right: 32px; }
+  .screen { padding-top: 28px; }
+  h2 { font-size: 1.9rem; }
+
+  .intro { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 56px; align-items: start; }
+  .hero { grid-column: 1; grid-row: 1 / span 8; padding: 40px 36px 32px; border-radius: 36px; }
+  .hero h1 { font-size: 3.4rem; }
+  .hero-art svg { max-height: 400px; }
+  .intro > :not(.hero) { grid-column: 2; }
+  .lede { margin-top: 8px; font-size: 1.15rem; }
+  .how { grid-template-columns: 1fr; }
+  .how li { padding: 14px 16px 14px 62px; }
+
+  .fields-step { display: grid; grid-template-columns: 340px minmax(0, 1fr); column-gap: 44px; align-items: start; }
+  .fields-step > .visual { grid-column: 1; grid-row: 1 / span 20; position: sticky; top: 16px; margin-top: 0; }
+  .fields-step > :not(.visual) { grid-column: 2; }
+  .visual .diagram { height: 300px; }
+
+  .frame-step { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 44px; align-items: start; }
+  .frame-fields .fields-step { display: block; }
+  .frame-fields .fields-step > .visual { position: static; }
+  .frame-fields .visual .diagram { height: 200px; }
+
+  .choices { max-width: 820px; }
+  .choice.goal { grid-template-columns: 130px 1fr; }
+  .choice.goal .posture { width: 130px; }
+
+  .result { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); column-gap: 44px; align-items: start; }
+  .hero-number span { font-size: 5rem; }
+  .result-diagram svg { max-height: 440px; }
+  .result-side .group:first-child { margin-top: 0; }
+}
