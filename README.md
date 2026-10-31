@@ -51,7 +51,7 @@ The three most worth validating against real fit data: the flexibility table, th
 
 ## Bike database
 
-`src/data/bikes.ts`: 169 road and gravel models from 28 brands (Trek, Specialized, Giant, Canyon, Cannondale, Merida, Scott, BMC, Cervélo, Pinarello, Bianchi, Colnago, Orbea, Ridley, Cube, Factor, Wilier, Look, Santa Cruz, Fuji, Felt, Kona, Focus, Niner, Marin, Surly, All-City, Basso). Numbers come from third-party listings (bikeinsights.com), not the manufacturers, and every entry is marked `verified: false` with a source link. Gravel bikes currently use the road fit rules. Riders whose bike is not listed can type its geometry and save it as a custom bike (stored only in their browser, shown under "My bikes").
+`src/data/bikes.ts`: 760 road and gravel models from 28 brands (Trek, Specialized, Giant, Canyon, Cannondale, Merida, Scott, BMC, Cervélo, Pinarello, Bianchi, Colnago, Orbea, Ridley, Cube, Factor, Wilier, Look, Santa Cruz, Fuji, Felt, Kona, Focus, Niner, Marin, Surly, All-City, Basso). Numbers come from third-party listings (bikeinsights.com), not the manufacturers, and every entry is marked `verified: false` with a source link. Gravel bikes currently use the road fit rules. Riders whose bike is not listed can type its geometry and save it as a custom bike (stored only in their browser, shown under "My bikes").
 
 ## Automatic data updates
 
