@@ -13,9 +13,9 @@ export const RANGES: Record<FieldKey, [number, number]> = {
   torso: [400, 700],
   arm: [450, 800],
   shoulderWidth: [300, 550],
-  stack: [450, 700],
-  reach: [330, 450],
-  hta: [68, 76],
+  stack: [440, 720],
+  reach: [320, 470],
+  hta: [66, 77],
   sta: [70, 77],
 }
 
