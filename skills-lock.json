@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "apple-hig-expert": {
+      "source": "alirezarezvani/claude-skills",
+      "sourceType": "github",
+      "skillPath": "product-team/apple-hig-expert/skills/apple-hig-expert/SKILL.md",
+      "computedHash": "1965f43d62ba8d71d5ae4cc16920382390cd6ff2e2fa6c470bc0a7b2195c8174"
+    },
+    "frontend-design": {
+      "source": "cline/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "9afacf3a0a892947a8be718f1a2556b87822205a0785a13d22110b735179bf22"
+    }
+  }
+}
