@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import type { Flexibility, Goal } from './engine/types'
 import { analyticsOn, trackEvent } from './analytics'
 import { LangContext, makeT, type Key } from './i18n'
@@ -8,9 +8,12 @@ import { findBike } from './data/bikes'
 import { BodyDiagram, FrameDiagram, PostureIcon, ResultDiagram } from './ui/Diagrams'
 import {
   BODY_FIELDS, CUR_FIELDS, EMPTY_FORM, EXAMPLE, FRAME_FIELDS, RANGES, complete, fieldHow, fieldLabel,
-  isAngle, status, toInput, type FieldKey, type Form,
+  isAngle, num, status, toInput, type FieldKey, type Form,
 } from './ui/form'
 import { Result } from './ui/Result'
+import type { PoseMeasurements } from './engine/bodyFromPose'
+
+const CameraMeasure = lazy(() => import('./ui/CameraMeasure'))
 import { load, save } from './ui/storage'
 
 const STORAGE_KEY = 'fitlab.v1'
@@ -27,6 +30,7 @@ const FLEX: Flexibility[] = [0, 1, 2, 3]
 export default function App() {
   const [form, setForm] = useState<Form>(() => load(STORAGE_KEY, EMPTY_FORM))
   const [focus, setFocus] = useState<FieldKey | undefined>()
+  const [camOpen, setCamOpen] = useState(false)
   const t = useMemo(() => makeT(form.lang), [form.lang])
 
   useEffect(() => save(STORAGE_KEY, form), [form])
@@ -106,6 +110,14 @@ export default function App() {
             <FieldsStep
               form={form} set={set} keys={BODY_FIELDS} focus={focus} setFocus={setFocus}
               visual={<BodyDiagram active={focus ?? 'height'} />} tip
+              extra={
+                <>
+                  <button className="secondary measure-btn" onClick={() => setCamOpen(true)} disabled={num(form.v.height) === null}>
+                    {t('cam.open')}
+                  </button>
+                  {num(form.v.height) === null && <p className="muted small">{t('cam.need')}</p>}
+                </>
+              }
             />
           )}
 
@@ -182,6 +194,25 @@ export default function App() {
           </div>
         )}
 
+        {camOpen && (
+          <Suspense fallback={null}>
+            <CameraMeasure
+              heightMm={num(form.v.height) ?? 1750}
+              onClose={() => setCamOpen(false)}
+              onApply={(m: PoseMeasurements) =>
+                set({
+                  v: {
+                    ...form.v,
+                    inseam: String(m.inseam),
+                    torso: String(m.torso),
+                    shoulderWidth: String(m.shoulderWidth),
+                    ...(m.arm > 0 ? { arm: String(m.arm) } : {}),
+                  },
+                })
+              }
+            />
+          </Suspense>
+        )}
         <footer className="disclaimer">
           {t('disclaimer')}
           {analyticsOn() && <span className="count-note"> {t('analytics.note')}</span>}
@@ -202,6 +233,7 @@ function FieldsStep(props: {
   title?: string
   intro?: string
   tip?: boolean
+  extra?: React.ReactNode
 }) {
   const { form, set, keys, setFocus } = props
   const t = useMemo(() => makeT(form.lang), [form.lang])
@@ -210,6 +242,7 @@ function FieldsStep(props: {
       {props.title && <h2>{props.title}</h2>}
       {props.intro && <p className="muted">{props.intro}</p>}
       {props.tip && <p className="tip">{t('measure.tip')}</p>}
+      {props.extra}
       <div className="visual">{props.visual}</div>
       {keys.map((k) => {
         const st = status(k, form.v[k])

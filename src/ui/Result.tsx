@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { computeFit } from '../engine/fit'
 import { recommendTires, type BikeKind } from '../engine/tires'
 import type { FitInput, FitResult, WarningCode } from '../engine/types'
 import { useT, type Key } from '../i18n'
 import { ResultDiagram } from './Diagrams'
+
+const Rider3D = lazy(() => import('./Rider3D'))
 
 const fmt = (n: number) => (Math.round(n * 10) / 10).toString()
 const sign = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + fmt(Math.abs(n))
@@ -42,6 +44,7 @@ export function Result({ input, kind, maxTire }: { input: FitInput; kind: BikeKi
   const t = useT()
   const r: FitResult = useMemo(() => computeFit(input), [input])
   const tires = recommendTires(kind, input.goal, maxTire)
+  const [view, setView] = useState<'2d' | '3d'>('2d')
 
   const setback = Math.round(r.saddleSetback)
   const rail = Math.round(r.railOffset)
@@ -71,7 +74,21 @@ export function Result({ input, kind, maxTire }: { input: FitInput; kind: BikeKi
         </section>
       )}
 
-      <ResultDiagram input={input} result={r} />
+      <div className="chips view-toggle" role="group">
+        <button className={`chip ${view === '2d' ? 'on' : ''}`} aria-pressed={view === '2d'} onClick={() => setView('2d')}>
+          {t('diagram.view2d')}
+        </button>
+        <button className={`chip ${view === '3d' ? 'on' : ''}`} aria-pressed={view === '3d'} onClick={() => setView('3d')}>
+          {t('diagram.view3d')}
+        </button>
+      </div>
+      {view === '2d' ? (
+        <ResultDiagram input={input} result={r} />
+      ) : (
+        <Suspense fallback={<p className="muted">{t('3d.loading')}</p>}>
+          <Rider3D input={input} result={r} />
+        </Suspense>
+      )}
       </div>
 
       <div className="result-side">

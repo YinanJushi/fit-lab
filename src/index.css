@@ -284,3 +284,32 @@ button.link { background: none; border: 0; color: var(--accent); text-decoration
 .results button:hover { background: var(--accent-soft); }
 .results small { color: var(--muted); margin-left: 6px; }
 .small { font-size: .82rem; }
+
+/* ---- 3D view ---- */
+.view-toggle { margin: 10px 0 4px; }
+.rider3d { background: var(--surface); border-radius: var(--radius); padding: 8px; margin: 8px 0 14px; }
+.rider3d-canvas { width: 100%; aspect-ratio: 4 / 3.4; border-radius: 12px; overflow: hidden; touch-action: none; cursor: grab; }
+.rider3d-canvas:active { cursor: grabbing; }
+.rider3d-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; padding: 8px 6px 2px; font-size: .85rem; }
+.rider3d-btns { display: flex; gap: 8px; }
+.rider3d-btns .chip { min-height: 38px; }
+
+/* ---- camera measuring ---- */
+.modal { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55); display: grid; place-items: center; padding: 12px; }
+.modal-card { background: var(--bg); color: var(--ink); width: min(560px, 100%); max-height: 94dvh; overflow: auto; border-radius: 22px; padding: 16px; }
+.modal-card header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.modal-card h2 { margin: 0; font-size: 1.25rem; }
+.cam-body { display: grid; gap: 10px; margin-top: 12px; }
+.cam-steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.cam-view { position: relative; background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 3 / 4; }
+.cam-view video { width: 100%; height: 100%; object-fit: cover; }
+.cam-view video.mirror { transform: scaleX(-1); }
+.cam-guide { position: absolute; inset: 6% 22%; border: 3px dashed rgba(255,255,255,.7); border-radius: 40% 40% 12% 12% / 22% 22% 6% 6%; pointer-events: none; }
+.cam-count { position: absolute; inset: 0; display: grid; place-items: center; font-size: 6rem; font-weight: 800; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+.cam-shot { display: block; max-width: 100%; max-height: 46dvh; width: auto; height: auto; margin: 12px auto 0; border-radius: 16px; }
+.cam-shot.hidden { display: none; }
+.actions-inline { display: flex; gap: 8px; flex-wrap: wrap; }
+.actions-inline button { flex: 1 1 140px; }
+.file-btn { display: grid; place-items: center; text-align: center; cursor: pointer; }
+.center { text-align: center; }
+.measure-btn { margin: 4px 0 14px; width: 100%; }

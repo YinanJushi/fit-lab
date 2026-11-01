@@ -2,3 +2,4 @@ node_modules
 dist
 upload-to-github
 HANDOFF.md
+public/mediapipe

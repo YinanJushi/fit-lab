@@ -53,6 +53,12 @@ The three most worth validating against real fit data: the flexibility table, th
 
 `src/data/bikes.ts`: 745 road and gravel models from 31 brands (Trek, Specialized, Giant, Canyon, Cannondale, Merida, Scott, BMC, Cervélo, Pinarello, Bianchi, Colnago, Orbea, Ridley, Cube, Factor, Wilier, Look, Santa Cruz, Fuji, Felt, Kona, Salsa, Focus, Niner, Marin, Surly, All-City, Basso, De Rosa, Lapierre). Numbers come from third-party listings (bikeinsights.com), not the manufacturers, and every entry is marked `verified: false` with a source link. Gravel bikes currently use the road fit rules. Riders whose bike is not listed can type its geometry and save it as a custom bike (stored only in their browser, shown under "My bikes").
 
+## 3D view and camera measuring
+
+- **3D view** (results page): `src/ui/Rider3D.tsx` draws the rider on the recommended bike with three.js from the numbers the fit engine already computed, with pedalling legs (`src/engine/ik.ts`). It loads only when opened.
+- **Camera measuring** (body step, beta): `src/ui/CameraMeasure.tsx` takes one standing photo (camera with a timer, or an uploaded photo) and runs Google's open-source MediaPipe pose model **inside the browser**. Nothing is uploaded. `src/engine/bodyFromPose.ts` turns the landmarks into inseam, torso, arm and shoulder width, scaled from the height the user typed. They are estimates (about 2–3 cm); the correction factors in `POSE_FACTORS` are unverified.
+- Files: the model is `public/models/pose_landmarker_full.task` (from Google's MediaPipe model bucket); the WebAssembly runtime is copied from `node_modules` into `public/mediapipe` before `dev` and `build` by `scripts/copy-mediapipe.mjs`.
+
 ## Automatic data updates
 
 `scripts/update-bikes.mjs` reads the public bikeinsights.com brand and bike pages (robots.txt allows it, it waits between requests) and merges what it finds into `src/data/bikes.json`. It only keeps pages that pass sanity checks (at least 3 sizes, stack and reach rising with size, plausible angles) and refuses to write if the data set would shrink by more than 10%.
