@@ -14,3 +14,4 @@ A = published formula/study · B = practitioner guidance · C = our placeholder 
 | Hood offset, hip offset, arm factor 0.92 | `constants.ts` | C | Tuned by us. |
 | Aero bars 20–40 mm narrower | `profiles.ts` | B | From the brief. |
 | Stem/spacer preferences per profile | `profiles.ts` | C | Our design choice. |
+| Adaptive options (leg difference, short cranks, upright limits, stability drop) | `constants.ts`, `fit.ts`, `rider.ts` | C | General practitioner guidance only; thresholds (3 mm shim, 10 mm warning, 0.19 crank ratio, 50° torso, 12 mm saddle drop) are our placeholders. Needs review by a physiotherapist or adaptive-cycling fitter. |

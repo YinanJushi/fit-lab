@@ -143,3 +143,34 @@ describe('other outputs', () => {
     expect([160, 165, 170, 172.5, 175]).toContain(computeFit(base).crankLength)
   })
 })
+
+describe('adaptive options', () => {
+  it('raises the torso and shortens the crank for limited flexion', () => {
+    const plain = computeFit(base)
+    const a = computeFit({ ...base, adapt: { limitedFlexion: true } })
+    expect(a.torsoAngle).toBeGreaterThanOrEqual(50)
+    expect(a.torsoAngle).toBeGreaterThanOrEqual(plain.torsoAngle)
+    expect(a.crankLength).toBeLessThan(plain.crankLength)
+    // shorter crank -> higher saddle by the same amount
+    expect(a.saddleHeight).toBeGreaterThan(plain.saddleHeight)
+  })
+  it('gives a shim for a leg length difference and warns when large', () => {
+    expect(computeFit({ ...base, adapt: { legLengthDiff: 2 } }).shim).toBe(0)
+    expect(computeFit({ ...base, adapt: { legLengthDiff: 6 } }).shim).toBe(6)
+    const big = computeFit({ ...base, adapt: { legLengthDiff: 14 } })
+    expect(big.warnings.some((w) => w.code === 'legdiff_large')).toBe(true)
+  })
+  it('lowers the saddle for stability first', () => {
+    const plain = computeFit(base)
+    const s = computeFit({ ...base, adapt: { stability: true } })
+    expect(plain.saddleHeight - s.saddleHeight).toBeCloseTo(12, 0)
+  })
+  it('keeps weight off the hands for reduced upper-limb function', () => {
+    const plain = computeFit({ ...base, goal: 'race' })
+    const a = computeFit({ ...base, goal: 'race', adapt: { reducedUpperLimb: true } })
+    expect(a.torsoAngle).toBeGreaterThan(plain.torsoAngle)
+  })
+  it('changes nothing when no option is set', () => {
+    expect(computeFit({ ...base, adapt: {} })).toEqual(computeFit(base))
+  })
+})

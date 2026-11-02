@@ -313,3 +313,26 @@ button.link { background: none; border: 0; color: var(--accent); text-decoration
 .file-btn { display: grid; place-items: center; text-align: center; cursor: pointer; }
 .center { text-align: center; }
 .measure-btn { margin: 4px 0 14px; width: 100%; }
+
+/* ---- adaptive options, size table, finder, share ---- */
+.check { display: flex; gap: 12px; align-items: flex-start; min-height: 48px; padding: 10px 0; cursor: pointer; }
+.check input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--brand); flex: none; }
+.small { font-size: .85rem; }
+.size-row .k small { color: var(--muted); display: block; font-weight: 400; }
+.size-row .k strong { color: var(--ink); }
+.pill { align-self: center; padding: 4px 12px; border-radius: 999px; font-size: .8rem; font-weight: 700; background: var(--line); color: var(--ink); white-space: nowrap; }
+.pill.best { background: var(--brand); color: var(--on-brand); }
+.pill.good { background: var(--accent-soft); color: var(--ink); }
+.pill.stretch { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
+.size-row.v-too_small, .size-row.v-too_large { opacity: .55; }
+.found { list-style: none; margin: 0; padding: 4px 16px; background: var(--surface); border-radius: var(--radius); }
+.found li { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.found li:last-child { border-bottom: 0; }
+.found small { color: var(--muted); }
+.share-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+.share-bar .chip { display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); }
+
+@media print {
+  .no-print, .bottom, .topbar, .progress, .view-toggle, .finder, .rider3d, .rider3d-btns { display: none !important; }
+  body { background: #fff; }
+}

@@ -59,6 +59,25 @@ The three most worth validating against real fit data: the flexibility table, th
 - **Camera measuring** (body step, beta): `src/ui/CameraMeasure.tsx` takes one standing photo (camera with a timer, or an uploaded photo) and runs Google's open-source MediaPipe pose model **inside the browser**. Nothing is uploaded. `src/engine/bodyFromPose.ts` turns the landmarks into inseam, torso, arm and shoulder width, scaled from the height the user typed. They are estimates (about 2–3 cm); the correction factors in `POSE_FACTORS` are unverified.
 - Files: the model is `public/models/pose_landmarker_full.task` (from Google's MediaPipe model bucket); the WebAssembly runtime is copied from `node_modules` into `public/mediapipe` before `dev` and `build` by `scripts/copy-mediapipe.mjs`.
 
+## Riders whose bodies work differently
+
+Optional panel on the goal step ("Does your body need anything special?"), all in `src/engine/` and marked unverified (grade C):
+
+| Option | Effect |
+|---|---|
+| One leg shorter | Saddle follows the longer leg (enter its inseam); shows a cleat/pedal shim for the shorter side; warns above 10 mm |
+| Limited knee or hip bend | Shorter crank (0.19 × inseam, down to 145 mm), saddle height follows it, torso at least 50° |
+| Back, neck or trunk limits | Torso at least 50° |
+| Reduced grip, arm or hand function | Torso at least 50° and shoulder angle capped at 80° to take weight off the hands, plus brake and bar notes |
+| Prosthesis | Notes only (set saddle with it on, socket pressure, cleat/foot angle) |
+| Stability first | Saddle 12 mm lower so a foot reaches the ground; notes on wider tires and step-through frames |
+
+These are general starting points, not medical advice; the app says so. A physiotherapist, prosthetist or fitter who knows the rider should confirm them.
+
+## Size finder and bike matcher
+
+`src/engine/sizes.ts`: rates every size of the chosen model for the rider (best / works / at the limit / too small / too large), and ranks the newest version of every model in a bike type by its best size. The rider's target hands do not depend on the frame, so they are computed once and only the cockpit solver runs per size.
+
 ## Automatic data updates
 
 `scripts/update-bikes.mjs` reads the public bikeinsights.com brand and bike pages (robots.txt allows it, it waits between requests) and merges what it finds into `src/data/bikes.json`. It only keeps pages that pass sanity checks (at least 3 sizes, stack and reach rising with size, plausible angles) and refuses to write if the data set would shrink by more than 10%.

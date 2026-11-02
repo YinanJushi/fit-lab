@@ -61,6 +61,20 @@ export const BAR_WIDTH_MAX = 460
 /** Crank length ≈ ratio * inseam, snapped to stock sizes. UNVERIFIED. */
 export const CRANK_INSEAM_RATIO = 0.21
 export const CRANK_SIZES = [160, 165, 170, 172.5, 175]
+/** Short cranks for limited knee/hip bend. UNVERIFIED rule of thumb. */
+export const SHORT_CRANK_RATIO = 0.19
+export const SHORT_CRANK_SIZES = [145, 150, 155, 160, 165, 170, 172.5, 175]
+
+// --- Adaptive riding (all UNVERIFIED, general guidance) ---
+/** Most upright torso angle we use when back, neck, grip or flexion limits apply. */
+export const ADAPT_MIN_TORSO = 50
+/** Shoulder angle cap when weight should come off the hands. */
+export const ADAPT_SHOULDER_ANGLE = 80
+/** Leg-length difference below this needs no shim; above the large limit see a professional. */
+export const LEGDIFF_IGNORE = 3
+export const LEGDIFF_LARGE = 10
+/** Saddle is lowered by this for stability-first riders so a foot reaches the ground. */
+export const STABILITY_SADDLE_DROP = 12
 
 /** Sanity range for inseam / height (spec). */
 export const INSEAM_RATIO_RANGE: [number, number] = [0.4, 0.52]

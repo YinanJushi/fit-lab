@@ -4,6 +4,8 @@ import { recommendTires, type BikeKind } from '../engine/tires'
 import type { FitInput, FitResult, WarningCode } from '../engine/types'
 import { useT, type Key } from '../i18n'
 import { ResultDiagram } from './Diagrams'
+import { BikeFinder, ShareBar, SizeTable } from './Extras'
+import type { Bike, BikeSize } from '../data/bikes'
 
 const Rider3D = lazy(() => import('./Rider3D'))
 
@@ -40,10 +42,20 @@ function CountUp({ value }: { value: number }) {
   return <>{fmt(shown)}</>
 }
 
-export function Result({ input, kind, maxTire }: { input: FitInput; kind: BikeKind; maxTire?: number }) {
+export function Result({
+  input, kind, maxTire, bike, size, onPick,
+}: {
+  input: FitInput
+  kind: BikeKind
+  maxTire?: number
+  bike?: Bike
+  size?: string
+  onPick: (bike: Bike, size: BikeSize) => void
+}) {
   const t = useT()
   const r: FitResult = useMemo(() => computeFit(input), [input])
   const tires = recommendTires(kind, input.goal, maxTire)
+  const { frame: _frame, ...rider } = input
   const [view, setView] = useState<'2d' | '3d'>('2d')
 
   const setback = Math.round(r.saddleSetback)
@@ -114,6 +126,7 @@ export function Result({ input, kind, maxTire }: { input: FitInput; kind: BikeKi
       <Group title={t('result.other')}>
         <Row k={t('r.barWidth')} v={`${r.barWidth} ${t('unit.mm')}`} />
         <Row k={t('r.crank')} v={`${r.crankLength} ${t('unit.mm')}`} />
+        {r.shim > 0 && <Row k={t('r.shim')} v={t('r.shim.v', { n: r.shim })} />}
         <Row k={t('r.torso')} v={`${fmt(r.torsoAngle)}°`} />
       </Group>
 
@@ -139,6 +152,10 @@ export function Result({ input, kind, maxTire }: { input: FitInput; kind: BikeKi
           ))}
         </Group>
       )}
+
+      <ShareBar input={input} result={r} bike={bike} size={size} />
+      {bike && <SizeTable bike={bike} rider={rider} />}
+      <BikeFinder rider={rider} kind={kind} onPick={onPick} />
 
       <ul className="notes">
         {r.notes.map((n) => (

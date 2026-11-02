@@ -1,4 +1,4 @@
-import type { FitInput, Flexibility, Goal } from '../engine/types'
+import type { Adaptations, FitInput, Flexibility, Goal } from '../engine/types'
 import type { BikeType } from '../data/bikes'
 import type { Key } from '../i18n'
 
@@ -35,6 +35,30 @@ export interface CustomBike {
   sta: number
 }
 
+export interface AdaptForm {
+  legDiff: string
+  flexion: boolean
+  back: boolean
+  upper: boolean
+  prosthesis: boolean
+  stability: boolean
+}
+
+export const EMPTY_ADAPT: AdaptForm = { legDiff: '', flexion: false, back: false, upper: false, prosthesis: false, stability: false }
+
+export function adaptFrom(a: AdaptForm): Adaptations | undefined {
+  const diff = num(a.legDiff) ?? 0
+  const out: Adaptations = {
+    legLengthDiff: diff > 0 ? diff : undefined,
+    limitedFlexion: a.flexion || undefined,
+    uprightBack: a.back || undefined,
+    reducedUpperLimb: a.upper || undefined,
+    prosthesis: a.prosthesis || undefined,
+    stability: a.stability || undefined,
+  }
+  return Object.values(out).some((x) => x !== undefined) ? out : undefined
+}
+
 export interface Form {
   lang: 'zh' | 'en'
   step: number
@@ -44,6 +68,7 @@ export interface Form {
   goal: Goal | null
   bike: { type: BikeType; brand: string; model: string; size: string; year?: number }
   customBikes: CustomBike[]
+  adapt: AdaptForm
 }
 
 const blank = <K extends string>(keys: K[]) => Object.fromEntries(keys.map((k) => [k, ''])) as Record<K, string>
@@ -57,6 +82,7 @@ export const EMPTY_FORM: Form = {
   goal: null,
   bike: { type: 'road', brand: '', model: '', size: '' },
   customBikes: [],
+  adapt: EMPTY_ADAPT,
 }
 
 export const EXAMPLE: Pick<Form, 'v' | 'flex' | 'goal'> = {
@@ -98,6 +124,7 @@ export function toInput(f: Form): FitInput | null {
     goal: f.goal,
     frame: { stack, reach, hta, sta },
     current: any ? current : undefined,
+    adapt: adaptFrom(f.adapt ?? EMPTY_ADAPT),
   }
 }
 

@@ -3,6 +3,8 @@ import type { Flexibility, Goal } from './engine/types'
 import { analyticsOn, trackEvent } from './analytics'
 import { LangContext, makeT, type Key } from './i18n'
 import { BikePicker, SaveBike } from './ui/BikePicker'
+import { AdaptPanel } from './ui/Extras'
+import type { Bike, BikeSize } from './data/bikes'
 import { computeFit } from './engine/fit'
 import { findBike } from './data/bikes'
 import { BodyDiagram, FrameDiagram, PostureIcon, ResultDiagram } from './ui/Diagrams'
@@ -46,6 +48,15 @@ export default function App() {
   const go = (step: number) => set({ step })
   const step = Math.min(Math.max(form.step, 0), STEPS.length)
   const input = useMemo(() => toInput(form), [form])
+
+  const chosenBike = form.bike.model && form.bike.brand
+    ? findBike(form.bike.type, form.bike.brand, form.bike.model, form.bike.year)
+    : undefined
+  const pickBike = (b: Bike, s: BikeSize) =>
+    set({
+      bike: { type: b.type, brand: b.brand, model: b.model, year: b.year, size: s.label },
+      v: { ...form.v, stack: String(s.stack), reach: String(s.reach), hta: String(s.hta), sta: String(s.sta) },
+    })
 
   const canNext =
     step === 1 ? complete(form, BODY_FIELDS)
@@ -150,6 +161,7 @@ export default function App() {
                   </button>
                 ))}
               </div>
+              <AdaptPanel value={form.adapt} onChange={(adapt) => set({ adapt })} />
             </section>
           )}
 
@@ -179,7 +191,16 @@ export default function App() {
             </div>
           )}
 
-          {step === 5 && (input ? <Result input={input} kind={form.bike.type} maxTire={findBike(form.bike.type, form.bike.brand, form.bike.model, form.bike.year)?.maxTire} /> : <p>{t('err.empty')}</p>)}
+          {step === 5 && (input ? (
+            <Result
+              input={input}
+              kind={form.bike.type}
+              maxTire={chosenBike?.maxTire}
+              bike={chosenBike}
+              size={form.bike.size}
+              onPick={pickBike}
+            />
+          ) : <p>{t('err.empty')}</p>)}
         </main>
 
         <div className="bottom">

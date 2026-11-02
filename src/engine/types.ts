@@ -34,11 +34,31 @@ export interface CurrentSetup {
   saddleHeight?: number
 }
 
+/**
+ * Optional adjustments for riders whose body works differently. All grade C: general
+ * practitioner guidance (经验值，待验证), not a clinical prescription.
+ */
+export interface Adaptations {
+  /** the shorter leg is this many mm shorter (0 = none) */
+  legLengthDiff?: number
+  /** limited knee or hip bending: shorter cranks, more upright */
+  limitedFlexion?: boolean
+  /** back, neck or trunk limits: more upright */
+  uprightBack?: boolean
+  /** reduced grip, arm or hand function: weight off the hands */
+  reducedUpperLimb?: boolean
+  /** rides with a prosthesis */
+  prosthesis?: boolean
+  /** balance or stability comes first */
+  stability?: boolean
+}
+
 export interface FitInput {
   body: BodyData
   goal: Goal
   frame: FrameGeometry
   current?: CurrentSetup
+  adapt?: Adaptations
 }
 
 export interface CockpitParams {
@@ -54,6 +74,9 @@ export type WarningCode =
   | 'saddle_change_large'
   | 'rail_out_of_range'
   | 'inseam_ratio'
+  | 'legdiff_large'
+  | 'adapt_upright'
+  | 'adapt_stability'
 
 export interface FitWarning {
   code: WarningCode
@@ -87,6 +110,10 @@ export interface FitResult {
   barWidth: number
   crankLength: number
   frameMismatch: FrameMismatch
+  /** distance (mm) between the hand position the frame can give and the wanted one */
+  cockpitError: number
+  /** mm of cleat or pedal shim under the shorter leg (0 = none) */
+  shim: number
   torsoAngle: number
   warnings: FitWarning[]
   notes: string[]
