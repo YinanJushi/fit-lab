@@ -1,5 +1,6 @@
 import type { Adaptations, FitInput, Flexibility, Goal } from '../engine/types'
 import type { BikeType } from '../data/bikes'
+import type { Units } from './units'
 import type { Key } from '../i18n'
 
 export type FieldKey =
@@ -61,6 +62,8 @@ export function adaptFrom(a: AdaptForm): Adaptations | undefined {
 
 export interface Form {
   lang: 'zh' | 'en'
+  /** display units only; every stored value stays in millimetres */
+  units: Units
   step: number
   v: Record<FieldKey, string>
   cur: Record<CurKey, string>
@@ -75,6 +78,7 @@ const blank = <K extends string>(keys: K[]) => Object.fromEntries(keys.map((k) =
 
 export const EMPTY_FORM: Form = {
   lang: 'en',
+  units: 'mm',
   step: 0,
   v: blank([...BODY_FIELDS, ...FRAME_FIELDS]),
   cur: blank(CUR_FIELDS),
@@ -104,7 +108,7 @@ export const validField = (k: FieldKey, s: string): boolean => {
 }
 
 export function exampleForm(f: Form): Form {
-  return { ...EMPTY_FORM, ...EXAMPLE, lang: f.lang, customBikes: f.customBikes, step: 1 }
+  return { ...EMPTY_FORM, ...EXAMPLE, lang: f.lang, units: f.units, customBikes: f.customBikes, step: 1 }
 }
 
 export type FieldStatus = { kind: 'invalid' } | { kind: 'empty' } | { kind: 'range'; min: number; max: number } | { kind: 'ok' }

@@ -336,3 +336,4 @@ button.link { background: none; border: 0; color: var(--accent); text-decoration
   .no-print, .bottom, .topbar, .progress, .view-toggle, .finder, .rider3d, .rider3d-btns { display: none !important; }
   body { background: #fff; }
 }
+.top-actions { display: flex; gap: 8px; }

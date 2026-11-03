@@ -4,6 +4,7 @@ import { analyticsOn, trackEvent } from './analytics'
 import { LangContext, makeT, type Key } from './i18n'
 import { BikePicker, SaveBike } from './ui/BikePicker'
 import { AdaptPanel } from './ui/Extras'
+import { LenInput, makeUnits, UnitsContext, useUnits } from './ui/units'
 import type { Bike, BikeSize } from './data/bikes'
 import { computeFit } from './engine/fit'
 import { findBike } from './data/bikes'
@@ -34,6 +35,7 @@ export default function App() {
   const [focus, setFocus] = useState<FieldKey | undefined>()
   const [camOpen, setCamOpen] = useState(false)
   const t = useMemo(() => makeT(form.lang), [form.lang])
+  const units = useMemo(() => makeUnits(form.units, t(form.units === 'in' ? 'unit.in' : 'unit.mm')), [form.units, t])
 
   useEffect(() => save(STORAGE_KEY, form), [form])
   useEffect(() => {
@@ -67,12 +69,21 @@ export default function App() {
 
   return (
     <LangContext.Provider value={t}>
+      <UnitsContext.Provider value={units}>
       <div className="app">
         <header className="topbar">
           <span className="brand">{t('app.title')}</span>
-          <button className="ghost-btn" onClick={() => set({ lang: form.lang === 'zh' ? 'en' : 'zh' })}>
-            {t('lang.switch')}
-          </button>
+          <span className="top-actions">
+            <button
+              className="ghost-btn" aria-label={t('units.switch')}
+              onClick={() => set({ units: form.units === 'mm' ? 'in' : 'mm' })}
+            >
+              {t(form.units === 'mm' ? 'units.to_in' : 'units.to_mm')}
+            </button>
+            <button className="ghost-btn" onClick={() => set({ lang: form.lang === 'zh' ? 'en' : 'zh' })}>
+              {t('lang.switch')}
+            </button>
+          </span>
         </header>
 
         {step > 0 && (
@@ -180,9 +191,13 @@ export default function App() {
                   <label className="field" key={k}>
                     <span className="lbl">{t(`cur.${k}` as Key)}</span>
                     <span className="inp">
-                      <input type="number" inputMode="decimal" value={form.cur[k]}
-                        onChange={(e) => set({ cur: { ...form.cur, [k]: e.target.value } })} />
-                      <i>{k === 'stemAngle' ? '°' : t('unit.mm')}</i>
+                      {k === 'stemAngle' ? (
+                        <input type="number" inputMode="decimal" value={form.cur[k]}
+                          onChange={(e) => set({ cur: { ...form.cur, [k]: e.target.value } })} />
+                      ) : (
+                        <LenInput value={form.cur[k]} onValue={(v) => set({ cur: { ...form.cur, [k]: v } })} />
+                      )}
+                      <i>{k === 'stemAngle' ? '°' : units.label}</i>
                     </span>
                   </label>
                 ))}
@@ -240,6 +255,7 @@ export default function App() {
         </footer>
         </div>
       </div>
+      </UnitsContext.Provider>
     </LangContext.Provider>
   )
 }
@@ -258,6 +274,7 @@ function FieldsStep(props: {
 }) {
   const { form, set, keys, setFocus } = props
   const t = useMemo(() => makeT(form.lang), [form.lang])
+  const u = useUnits()
   return (
     <section className="fields-step">
       {props.title && <h2>{props.title}</h2>}
@@ -273,21 +290,28 @@ function FieldsStep(props: {
             <span className="lbl">{t(fieldLabel(k))}</span>
             <span className="how">{t(fieldHow(k))}</span>
             <span className="inp">
-              <input
-                type="number" inputMode="decimal" step={isAngle(k) ? 0.5 : 1} value={form.v[k]}
-                placeholder={String(Math.round((min + max) / 2))}
-                aria-invalid={st.kind === 'invalid'}
-                aria-describedby={st.kind === 'invalid' || st.kind === 'range' ? `error-${k}` : undefined}
-                onFocus={() => setFocus(k)}
-                onChange={(e) => set({
-                  v: { ...form.v, [k]: e.target.value },
+              {(() => {
+                const common = {
+                  placeholder: isAngle(k) ? String(Math.round((min + max) / 2)) : u.num(Math.round((min + max) / 2)),
+                  'aria-invalid': st.kind === 'invalid',
+                  'aria-describedby': st.kind === 'invalid' || st.kind === 'range' ? `error-${k}` : undefined,
+                  onFocus: () => setFocus(k),
+                }
+                const change = (v: string) => set({
+                  v: { ...form.v, [k]: v },
                   ...(FRAME_FIELDS.includes(k) ? { bike: { type: form.bike.type, brand: '', model: '', size: '' } } : {}),
-                })}
-              />
-              <i>{isAngle(k) ? '°' : t('unit.mm')}</i>
+                })
+                return isAngle(k) ? (
+                  <input {...common} type="number" inputMode="decimal" step={0.5} value={form.v[k]}
+                    onChange={(e) => change(e.target.value)} />
+                ) : (
+                  <LenInput {...common} step={u.units === 'in' ? 0.1 : 1} value={form.v[k]} onValue={change} />
+                )
+              })()}
+              <i>{isAngle(k) ? '°' : u.label}</i>
             </span>
             {st.kind === 'invalid' && <span className="msg" id={`error-${k}`} role="alert">{t(isAngle(k) ? 'err.angle' : 'err.positive')}</span>}
-            {st.kind === 'range' && <span className="msg" id={`error-${k}`}>{t('err.range', { min: st.min, max: st.max })}</span>}
+            {st.kind === 'range' && <span className="msg" id={`error-${k}`}>{t('err.range', isAngle(k) ? { min: st.min, max: st.max } : { min: u.num(st.min), max: `${u.num(st.max)} ${u.label}` })}</span>}
           </label>
         )
       })}

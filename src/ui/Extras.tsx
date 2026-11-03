@@ -4,12 +4,14 @@ import { evaluateSizes, matchBikes, type RiderInput, type SizeVerdict } from '..
 import type { FitInput, FitResult } from '../engine/types'
 import { useT, type Key } from '../i18n'
 import { type AdaptForm } from './form'
+import { LenInput, useUnits } from './units'
 
 const REPO = 'https://github.com/YinanJushi/fit-lab'
 
 /** Optional "my body works differently" panel on the goal step. */
 export function AdaptPanel({ value, onChange }: { value: AdaptForm; onChange: (a: AdaptForm) => void }) {
   const t = useT()
+  const u = useUnits()
   const toggles: { k: 'flexion' | 'back' | 'upper' | 'prosthesis' | 'stability'; label: Key }[] = [
     { k: 'flexion', label: 'adapt.flexion' },
     { k: 'back', label: 'adapt.back' },
@@ -28,11 +30,8 @@ export function AdaptPanel({ value, onChange }: { value: AdaptForm; onChange: (a
         <span className="lbl">{t('adapt.legdiff')}</span>
         <span className="how">{t('adapt.legdiff.how')}</span>
         <span className="inp">
-          <input
-            type="number" inputMode="decimal" min={0} value={value.legDiff}
-            onChange={(e) => onChange({ ...value, legDiff: e.target.value })}
-          />
-          <i>{t('unit.mm')}</i>
+          <LenInput min={0} value={value.legDiff} onValue={(legDiff) => onChange({ ...value, legDiff })} />
+          <i>{u.label}</i>
         </span>
       </label>
       {toggles.map(({ k, label }) => (
@@ -57,6 +56,7 @@ const VERDICT_KEY: Record<SizeVerdict, Key> = {
 /** Every size of the chosen model, rated for this rider. */
 export function SizeTable({ bike, rider }: { bike: Bike; rider: RiderInput }) {
   const t = useT()
+  const u = useUnits()
   const rows = useMemo(() => evaluateSizes(bike.sizes, rider), [bike, rider])
   return (
     <section className="group sizes">
@@ -65,7 +65,7 @@ export function SizeTable({ bike, rider }: { bike: Bike; rider: RiderInput }) {
       <div className="rows">
         {rows.map((r) => (
           <div className={`row size-row v-${r.verdict}`} key={r.label}>
-            <span className="k"><strong>{r.label}</strong> <small>{t('sizes.col.stack')} {r.stack} · {t('sizes.col.reach')} {r.reach}</small></span>
+            <span className="k"><strong>{r.label}</strong> <small>{t('sizes.col.stack')} {u.len(r.stack)} · {t('sizes.col.reach')} {u.len(r.reach)}</small></span>
             <span className={`pill ${r.verdict}`}>{t(VERDICT_KEY[r.verdict])}</span>
           </div>
         ))}
@@ -97,6 +97,7 @@ export function BikeFinder({
   onPick: (bike: Bike, size: BikeSize) => void
 }) {
   const t = useT()
+  const u = useUnits()
   const [type, setType] = useState<BikeType>(kind)
   const [run, setRun] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -136,7 +137,7 @@ export function BikeFinder({
               <div>
                 <strong>{bike.brand} {bike.model}</strong> <small>{bike.year}</small>
                 <br />
-                <small>{t('finder.size', { s: size.label })} · {t('finder.err', { n: size.error })}</small>
+                <small>{t('finder.size', { s: size.label })} · {t('finder.err', { n: u.len(size.error) })}</small>
               </div>
               <button
                 className="chip"
@@ -165,20 +166,21 @@ export function ShareBar({
   size?: string
 }) {
   const t = useT()
+  const u = useUnits()
   const [copied, setCopied] = useState(false)
   const name = bike ? `${bike.brand} ${bike.model} ${bike.year}` : ''
   const summary = () =>
     [
       t('share.title'),
-      t('share.line.rider', { h: input.body.height, i: input.body.inseam }),
+      t('share.line.rider', { h: u.len(input.body.height), i: u.len(input.body.inseam) }),
       ...(bike ? [t('share.line.bike', { bike: name, size: size ?? '-' })] : []),
       t('share.line.goal', { goal: t(`goal.${input.goal}` as Key) }),
-      `${t('r.saddleHeight')}: ${result.saddleHeight} ${t('unit.mm')}`,
-      `${t('r.stem')}: ${result.stemLength} ${t('unit.mm')} / ${result.stemAngle}°`,
-      `${t('r.spacers')}: ${result.spacers} ${t('unit.mm')}`,
-      `${t('r.barWidth')}: ${result.barWidth} ${t('unit.mm')}`,
-      `${t('r.crank')}: ${result.crankLength} ${t('unit.mm')}`,
-      ...(result.shim > 0 ? [`${t('r.shim')}: ${t('r.shim.v', { n: result.shim })}`] : []),
+      `${t('r.saddleHeight')}: ${u.len(result.saddleHeight)}`,
+      `${t('r.stem')}: ${u.len(result.stemLength)} / ${result.stemAngle}°`,
+      `${t('r.spacers')}: ${u.len(result.spacers)}`,
+      `${t('r.barWidth')}: ${u.len(result.barWidth)}`,
+      `${t('r.crank')}: ${u.len(result.crankLength)}`,
+      ...(result.shim > 0 ? [`${t('r.shim')}: ${t('r.shim.v', { n: u.len(result.shim) })}`] : []),
       t('share.line.note'),
     ].join('\n')
   const copy = async () => {

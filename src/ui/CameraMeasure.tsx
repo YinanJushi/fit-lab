@@ -2,6 +2,7 @@
 // browser: the picture is never uploaded or stored.
 import { useEffect, useRef, useState } from 'react'
 import { LM, measurementsFromPose, type PoseMeasurements, type PoseProblem } from '../engine/bodyFromPose'
+import { useUnits } from './units'
 import { useT, type Key } from '../i18n'
 
 type Phase = 'intro' | 'camera' | 'countdown' | 'working' | 'result' | 'error'
@@ -49,6 +50,7 @@ const BONES: [number, number][] = [
 
 export default function CameraMeasure({ heightMm, onApply, onClose }: Props) {
   const t = useT()
+  const u = useUnits()
   const [phase, setPhase] = useState<Phase>('intro')
   const [err, setErr] = useState<Key | null>(null)
   const [count, setCount] = useState(5)
@@ -230,10 +232,10 @@ export default function CameraMeasure({ heightMm, onApply, onClose }: Props) {
             ))}
             {m ? (
               <div className="rows">
-                <div className="row"><span className="k">{t('f.inseam')}</span><span className="v">{m.inseam} {t('unit.mm')}</span></div>
-                <div className="row"><span className="k">{t('f.torso')}</span><span className="v">{m.torso} {t('unit.mm')}</span></div>
-                <div className="row"><span className="k">{t('f.arm')}</span><span className="v">{m.arm > 0 ? `${m.arm} ${t('unit.mm')}` : '—'}</span></div>
-                <div className="row"><span className="k">{t('f.shoulderWidth')}</span><span className="v">{m.shoulderWidth} {t('unit.mm')}</span></div>
+                <div className="row"><span className="k">{t('f.inseam')}</span><span className="v">{u.len(m.inseam)}</span></div>
+                <div className="row"><span className="k">{t('f.torso')}</span><span className="v">{u.len(m.torso)}</span></div>
+                <div className="row"><span className="k">{t('f.arm')}</span><span className="v">{m.arm > 0 ? u.len(m.arm) : '—'}</span></div>
+                <div className="row"><span className="k">{t('f.shoulderWidth')}</span><span className="v">{u.len(m.shoulderWidth)}</span></div>
               </div>
             ) : (
               <p className="tip">{t('cam.problem.retry')}</p>

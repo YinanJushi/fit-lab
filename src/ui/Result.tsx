@@ -5,12 +5,25 @@ import type { FitInput, FitResult, WarningCode } from '../engine/types'
 import { useT, type Key } from '../i18n'
 import { ResultDiagram } from './Diagrams'
 import { BikeFinder, ShareBar, SizeTable } from './Extras'
+import { useUnits } from './units'
 import type { Bike, BikeSize } from '../data/bikes'
 
 const Rider3D = lazy(() => import('./Rider3D'))
 
 const fmt = (n: number) => (Math.round(n * 10) / 10).toString()
-const sign = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + fmt(Math.abs(n))
+
+/** Warning parameters that are lengths get printed in the rider's unit. */
+const LEN_PARAMS: Partial<Record<WarningCode, string[]>> = {
+  saddle_change_large: ['change'],
+  rail_out_of_range: ['rail'],
+  legdiff_large: ['mm'],
+  adapt_stability: ['n'],
+}
+function lenParams(w: { code: WarningCode; params?: Record<string, number | string> }, u: ReturnType<typeof useUnits>) {
+  if (!w.params) return undefined
+  const keys = LEN_PARAMS[w.code] ?? []
+  return Object.fromEntries(Object.entries(w.params).map(([k, v]) => [k, keys.includes(k) ? u.len(Number(v)) : v]))
+}
 
 const CMP_LABEL: Record<string, Key> = {
   saddleHeight: 'r.saddleHeight',
@@ -20,7 +33,7 @@ const CMP_LABEL: Record<string, Key> = {
   crankLength: 'r.crank',
 }
 
-function CountUp({ value }: { value: number }) {
+function CountUp({ value, digits }: { value: number; digits: number }) {
   const [shown, setShown] = useState(value)
   useEffect(() => {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -39,7 +52,7 @@ function CountUp({ value }: { value: number }) {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [value])
-  return <>{fmt(shown)}</>
+  return <>{(Math.round(shown * 10 ** digits) / 10 ** digits).toString()}</>
 }
 
 export function Result({
@@ -53,6 +66,7 @@ export function Result({
   onPick: (bike: Bike, size: BikeSize) => void
 }) {
   const t = useT()
+  const u = useUnits()
   const r: FitResult = useMemo(() => computeFit(input), [input])
   const tires = recommendTires(kind, input.goal, maxTire)
   const { frame: _frame, ...rider } = input
@@ -60,6 +74,8 @@ export function Result({
 
   const setback = Math.round(r.saddleSetback)
   const rail = Math.round(r.railOffset)
+  const cv = (key: string, v: number) => (key === 'stemAngle' ? fmt(v) : u.num(v))
+  const cvSign = (key: string, v: number) => (v > 0 ? '+' : v < 0 ? '−' : '') + cv(key, Math.abs(v))
   const warnKey = (c: WarningCode) => `warn.${c}` as Key
 
   return (
@@ -68,8 +84,8 @@ export function Result({
       <section className="hero-card" aria-label={t('result.title')}>
         <p className="eyebrow">{t(`goal.${input.goal}` as Key)}</p>
         <div className="hero-number">
-          <span><CountUp value={r.saddleHeight} /></span>
-          <small>{t('unit.mm')}</small>
+          <span><CountUp value={u.units === 'in' ? r.saddleHeight / 25.4 : r.saddleHeight} digits={u.units === 'in' ? 2 : 1} /></span>
+          <small>{u.label}</small>
         </div>
         <p className="hero-label">{t('r.saddleHeight')}</p>
         <p className="muted">{t('result.sub')}</p>
@@ -80,7 +96,7 @@ export function Result({
           {[...r.warnings].sort((a, b) => Number(b.code.startsWith('frame_')) - Number(a.code.startsWith('frame_'))).map((w) => (
             <div key={w.code} className={`warning ${w.code.startsWith('frame_') ? 'severe' : ''}`} role="note">
               <span className="warn-icon" aria-hidden="true">!</span>
-              <p>{t(warnKey(w.code), w.params)}</p>
+              <p>{t(warnKey(w.code), lenParams(w, u))}</p>
             </div>
           ))}
         </section>
@@ -105,27 +121,27 @@ export function Result({
 
       <div className="result-side">
       <Group title={t('result.saddle')}>
-        <Row k={t('r.saddleHeight')} v={`${fmt(r.saddleHeight)} ${t('unit.mm')}`} />
+        <Row k={t('r.saddleHeight')} v={u.len(r.saddleHeight)} />
         <Row
           k={t('r.setback')}
-          v={t(setback >= 0 ? 'r.setback.back' : 'r.setback.fwd', { n: Math.abs(setback) })}
+          v={t(setback >= 0 ? 'r.setback.back' : 'r.setback.fwd', { n: u.len(Math.abs(setback)) })}
         />
-        <Row k={t('r.seatpost')} v={`${r.seatpostSetback} ${t('unit.mm')}`} />
+        <Row k={t('r.seatpost')} v={u.len(r.seatpostSetback)} />
         <Row
           k={t('r.rail')}
-          v={rail === 0 ? t('r.rail.mid') : t(rail > 0 ? 'r.rail.back' : 'r.rail.fwd', { n: Math.abs(rail) })}
+          v={rail === 0 ? t('r.rail.mid') : t(rail > 0 ? 'r.rail.back' : 'r.rail.fwd', { n: u.len(Math.abs(rail)) })}
         />
       </Group>
 
       <Group title={t('result.cockpit')}>
-        <Row k={t('r.stem')} v={`${r.stemLength} ${t('unit.mm')}`} />
+        <Row k={t('r.stem')} v={u.len(r.stemLength)} />
         <Row k={t('r.stemAngle')} v={`${r.stemAngle > 0 ? '+' : ''}${r.stemAngle}°`} />
-        <Row k={t('r.spacers')} v={`${r.spacers} ${t('unit.mm')}`} />
+        <Row k={t('r.spacers')} v={u.len(r.spacers)} />
       </Group>
 
       <Group title={t('result.other')}>
-        <Row k={t('r.barWidth')} v={`${r.barWidth} ${t('unit.mm')}`} />
-        <Row k={t('r.crank')} v={`${r.crankLength} ${t('unit.mm')}`} />
+        <Row k={t('r.barWidth')} v={u.len(r.barWidth)} />
+        <Row k={t('r.crank')} v={u.len(r.crankLength)} />
         {r.shim > 0 && <Row k={t('r.shim')} v={t('r.shim.v', { n: r.shim })} />}
         <Row k={t('r.torso')} v={`${fmt(r.torsoAngle)}°`} />
       </Group>
@@ -145,8 +161,8 @@ export function Result({
             <div className="row cmp" key={c.key}>
               <span className="k">{t(CMP_LABEL[c.key])}</span>
               <span className="v">
-                {fmt(c.current)} → <strong>{fmt(c.recommended)}</strong>
-                <em className={c.delta === 0 ? 'zero' : ''}>{sign(c.delta)}</em>
+                {cv(c.key, c.current)} → <strong>{cv(c.key, c.recommended)}</strong>
+                <em className={c.delta === 0 ? 'zero' : ''}>{cvSign(c.key, c.delta)}</em>
               </span>
             </div>
           ))}

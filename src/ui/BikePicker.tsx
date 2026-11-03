@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { BIKE_TYPES, brandsFor, DATA_UPDATED, findBike, modelsFor, searchBikes } from '../data/bikes'
 import { useT } from '../i18n'
+import { useUnits } from './units'
 import { complete, FRAME_FIELDS, num, type CustomBike, type Form } from './form'
 
 export const MINE = '__mine__'
 
 export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) => void }) {
   const t = useT()
+  const u = useUnits()
   const { type, brand, model, size, year } = form.bike
   const [q, setQ] = useState('')
   const results = q.trim().length >= 2 ? searchBikes(type, q) : []
@@ -137,7 +139,7 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
           {bike && chosen && (
             <div className="filled">
               <strong>{t('bike.filled')}</strong>
-              <span>Stack {chosen.stack} · Reach {chosen.reach} · HTA {chosen.hta}° · STA {chosen.sta}°</span>
+              <span>Stack {u.len(chosen.stack)} · Reach {u.len(chosen.reach)} · HTA {chosen.hta}° · STA {chosen.sta}°</span>
               {!bike.verified && (
                 <small>{t('bike.check')} <a href={bike.source} target="_blank" rel="noreferrer">{t('bike.source')}</a></small>
               )}
@@ -147,7 +149,7 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
           {custom && (
             <div className="filled">
               <strong>{t('bike.filled')}</strong>
-              <span>Stack {custom.stack} · Reach {custom.reach} · HTA {custom.hta}° · STA {custom.sta}°</span>
+              <span>Stack {u.len(custom.stack)} · Reach {u.len(custom.reach)} · HTA {custom.hta}° · STA {custom.sta}°</span>
               <small>{t('bike.custom.pick')} · <button className="link" onClick={() => remove(custom.id)}>{t('bike.remove')}</button></small>
             </div>
           )}
