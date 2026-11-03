@@ -115,6 +115,8 @@ const en = {
   'cur.crankLength': 'Crank length',
 
   'err.empty': 'Please enter a number.',
+  'err.positive': 'Enter a measurement greater than zero, in millimetres.',
+  'err.angle': 'Enter an angle greater than 0° and less than 90°.',
   'err.range': 'Usually {min}–{max}. Please measure again.',
 
   'result.title': 'Your starting fit',
@@ -367,6 +369,8 @@ const zh: Record<Key, string> = {
   'cur.crankLength': '曲柄长度',
 
   'err.empty': '请输入数字。',
+  'err.positive': '请输入大于 0 的测量值，单位为毫米。',
+  'err.angle': '请输入大于 0° 且小于 90° 的角度。',
   'err.range': '通常在 {min}–{max} 之间，请重新测量。',
 
   'result.title': '你的起始调整方案',

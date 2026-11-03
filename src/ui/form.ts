@@ -97,21 +97,32 @@ export const num = (s: string): number | null => {
   return Number.isFinite(n) ? n : null
 }
 
-export type FieldStatus = { kind: 'empty' } | { kind: 'range'; min: number; max: number } | { kind: 'ok' }
+// Reject impossible dimensions while keeping unusual but positive measurements usable.
+export const validField = (k: FieldKey, s: string): boolean => {
+  const n = num(s)
+  return n !== null && n > 0 && (!isAngle(k) || n < 90)
+}
+
+export function exampleForm(f: Form): Form {
+  return { ...EMPTY_FORM, ...EXAMPLE, lang: f.lang, customBikes: f.customBikes, step: 1 }
+}
+
+export type FieldStatus = { kind: 'invalid' } | { kind: 'empty' } | { kind: 'range'; min: number; max: number } | { kind: 'ok' }
 
 export function status(k: FieldKey, s: string): FieldStatus {
   const n = num(s)
   if (n === null) return { kind: 'empty' }
+  if (!validField(k, s)) return { kind: 'invalid' }
   const [min, max] = RANGES[k]
   return n < min || n > max ? { kind: 'range', min, max } : { kind: 'ok' }
 }
 
-export const complete = (f: Form, keys: FieldKey[]) => keys.every((k) => num(f.v[k]) !== null)
+export const complete = (f: Form, keys: FieldKey[]) => keys.every((k) => validField(k, f.v[k]))
 
 export function toInput(f: Form): FitInput | null {
   const g = (k: FieldKey) => num(f.v[k])
   const vals = [g('height'), g('inseam'), g('torso'), g('arm'), g('shoulderWidth'), g('stack'), g('reach'), g('hta'), g('sta')]
-  if (vals.some((x) => x === null) || f.flex === null || f.goal === null) return null
+  if (!complete(f, [...BODY_FIELDS, ...FRAME_FIELDS]) || f.flex === null || f.goal === null) return null
   const [height, inseam, torso, arm, shoulderWidth, stack, reach, hta, sta] = vals as number[]
   const c = (k: CurKey) => num(f.cur[k]) ?? undefined
   const current = {

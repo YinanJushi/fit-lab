@@ -10,7 +10,7 @@ import { findBike } from './data/bikes'
 import { BodyDiagram, FrameDiagram, PostureIcon, ResultDiagram } from './ui/Diagrams'
 import {
   BODY_FIELDS, CUR_FIELDS, EMPTY_FORM, EXAMPLE, FRAME_FIELDS, RANGES, complete, fieldHow, fieldLabel,
-  isAngle, num, status, toInput, type FieldKey, type Form,
+  exampleForm, isAngle, num, status, toInput, validField, type FieldKey, type Form,
 } from './ui/form'
 import { Result } from './ui/Result'
 import type { PoseMeasurements } from './engine/bodyFromPose'
@@ -100,7 +100,7 @@ export default function App() {
               <button className="primary" onClick={() => go(1)}>{t('start')}</button>
               <button
                 className="secondary"
-                onClick={() => set({ ...EXAMPLE, cur: EMPTY_FORM.cur, step: 1 })}
+                onClick={() => setForm(exampleForm(form))}
               >
                 {t('example')}
               </button>
@@ -123,10 +123,10 @@ export default function App() {
               visual={<BodyDiagram active={focus ?? 'height'} />} tip
               extra={
                 <>
-                  <button className="secondary measure-btn" onClick={() => setCamOpen(true)} disabled={num(form.v.height) === null}>
+                  <button className="secondary measure-btn" onClick={() => setCamOpen(true)} disabled={!validField('height', form.v.height)}>
                     {t('cam.open')}
                   </button>
-                  {num(form.v.height) === null && <p className="muted small">{t('cam.need')}</p>}
+                  {!validField('height', form.v.height) && <p className="muted small">{t('cam.need')}</p>}
                 </>
               }
             />
@@ -269,19 +269,25 @@ function FieldsStep(props: {
         const st = status(k, form.v[k])
         const [min, max] = RANGES[k]
         return (
-          <label className={`field ${st.kind === 'range' ? 'warn' : ''}`} key={k}>
+          <label className={`field ${st.kind === 'range' || st.kind === 'invalid' ? 'warn' : ''}`} key={k}>
             <span className="lbl">{t(fieldLabel(k))}</span>
             <span className="how">{t(fieldHow(k))}</span>
             <span className="inp">
               <input
                 type="number" inputMode="decimal" step={isAngle(k) ? 0.5 : 1} value={form.v[k]}
                 placeholder={String(Math.round((min + max) / 2))}
+                aria-invalid={st.kind === 'invalid'}
+                aria-describedby={st.kind === 'invalid' || st.kind === 'range' ? `error-${k}` : undefined}
                 onFocus={() => setFocus(k)}
-                onChange={(e) => set({ v: { ...form.v, [k]: e.target.value } })}
+                onChange={(e) => set({
+                  v: { ...form.v, [k]: e.target.value },
+                  ...(FRAME_FIELDS.includes(k) ? { bike: { type: form.bike.type, brand: '', model: '', size: '' } } : {}),
+                })}
               />
               <i>{isAngle(k) ? '°' : t('unit.mm')}</i>
             </span>
-            {st.kind === 'range' && <span className="msg">{t('err.range', { min: st.min, max: st.max })}</span>}
+            {st.kind === 'invalid' && <span className="msg" id={`error-${k}`} role="alert">{t(isAngle(k) ? 'err.angle' : 'err.positive')}</span>}
+            {st.kind === 'range' && <span className="msg" id={`error-${k}`}>{t('err.range', { min: st.min, max: st.max })}</span>}
           </label>
         )
       })}

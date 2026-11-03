@@ -17,7 +17,10 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
   const chosen = bike?.sizes.find((s) => s.label === size)
   const custom = brand === MINE ? mine.find((b) => b.id === model) : undefined
 
-  const setBike = (patch: Partial<Form['bike']>) => set({ bike: { ...form.bike, ...patch } })
+  const setBike = (patch: Partial<Form['bike']>) => set({
+    bike: { ...form.bike, ...patch },
+    v: { ...form.v, stack: '', reach: '', hta: '', sta: '' },
+  })
   const fill = (g: { stack: number; reach: number; hta: number; sta: number }) => ({
     ...form.v,
     stack: String(g.stack),
@@ -36,7 +39,7 @@ export function BikePicker({ form, set }: { form: Form; set: (p: Partial<Form>) 
   }
   const pickCustom = (id: string) => {
     const c = mine.find((b) => b.id === id)
-    set({ bike: { ...form.bike, model: id, year: undefined, size: '' }, ...(c ? { v: fill(c) } : {}) })
+    set({ bike: { ...form.bike, model: id, year: undefined, size: '' }, v: c ? fill(c) : { ...form.v, stack: '', reach: '', hta: '', sta: '' } })
   }
   const remove = (id: string) => {
     set({
